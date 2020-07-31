@@ -96,7 +96,7 @@
                   continue;
                 }
                 if (candleDefinitionPairCompare(c, candleA, candleB)) {
-                  candleResult += ("AND(" + c.defA + (i+iA) + c.defComp + c.defB + (i+iB) + ")");
+                  candleResult += ("AND(" + c.defA + (i+iA+1) + c.defComp + c.defB + (i+iB+1) + ")");
                 }
               }
             }
