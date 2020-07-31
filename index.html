@@ -1,7 +1,8 @@
 <html>
   <body>
     <h1>Candef</h1>
-    <textarea style="height:200px;width:50%;" id="input_data"></textarea>
+    <textarea style="height:20px;width:50%;" id="input_config" placeholder="config"></textarea>
+    <textarea style="height:200px;width:50%;" id="input_data" placeholder="input data"></textarea>
     <br/>
     <input type="button" value="Generate" onclick="generateResultFromInput()"/>
     <br/>
@@ -12,19 +13,22 @@
   <script>
     jQuery(document).ready(function () {
       $("#input_data").val(
-`10,10,10,10
-10,12,10,10
-10,10,8,10
-10,12,8,10
-10,12,10,12
-10,14,10,12
-10,12,8,12
-10,14,8,12
-10,10,8,8
-10,12,8,8
-10,10,6,8
-10,12,6,8`
-)
+        "10,10,10,10\n" +
+        "10,12,10,10\n" +
+        "10,10,8,10\n" +
+        "10,12,8,10\n" +
+        "10,12,10,12\n" +
+        "10,14,10,12\n" +
+        "10,12,8,12\n" +
+        "10,14,8,12\n" +
+        "10,10,8,8\n" +
+        "10,12,8,8\n" +
+        "10,10,6,8\n" +
+        "10,12,6,8\n"
+      );
+
+      $("#input_config").val(JSON.stringify(candleDefinitionPairs));
+      // $("#input_config").val(JSON.stringify(candleDefinitionPairs, null, 2));
     });
 
     let candleDefinitionPairs = [
@@ -55,12 +59,16 @@
         return parseInt(candle1[c.defA]) > parseInt(candle2[c.defB])
       } else if (c.defComp == "<") {
         return parseInt(candle1[c.defA]) < parseInt(candle2[c.defB])
-      } else if (c.defComp == "==") {
+      } else if ((c.defComp == "=") || (c.defComp == "==")) {
         return parseInt(candle1[c.defA]) == parseInt(candle2[c.defB])
       }
     }
 
     function generateResultFromInput() {
+      // seetup config
+      candleDefinitionPairs = JSON.parse( $("#input_config").val());
+
+      // getting result from input
       let inputData = $("#input_data").val();
       let candles = getCandle(inputData);
       let result = generateResult(candles);
