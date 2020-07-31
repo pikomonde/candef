@@ -1,5 +1,128 @@
 <html>
   <body>
-    <p>Halo Candef!</p>
+    <h1>Candef</h1>
+    <textarea style="height:200px;width:50%;" id="input_data"></textarea>
+    <br/>
+    <input type="button" value="Generate" onclick="generateResultFromInput()"/>
+    <br/>
+    <br/>
+    <textarea style="height:200px;width:50%;" id="output_data"></textarea>
   </body>
+  <script src="vendor/jquery-3.5.1.min.js"></script>
+  <script>
+    jQuery(document).ready(function () {
+      $("#input_data").val(
+`10,10,10,10
+10,12,10,10
+10,10,8,10
+10,12,8,10
+10,12,10,12
+10,14,10,12
+10,12,8,12
+10,14,8,12
+10,10,8,8
+10,12,8,8
+10,10,6,8
+10,12,6,8`
+)
+    });
+
+    let candleDefinitionPairs = [
+        {"defA": "O","defB": "H","defComp": ">","ignore": false},
+        {"defA": "O","defB": "H","defComp": "<","ignore": true},
+        {"defA": "O","defB": "H","defComp": "==","ignore": true},
+        {"defA": "O","defB": "L","defComp": ">","ignore": false},
+        {"defA": "O","defB": "L","defComp": "<","ignore": true},
+        {"defA": "O","defB": "L","defComp": "==","ignore": true},
+        {"defA": "O","defB": "C","defComp": ">","ignore": false},
+        {"defA": "O","defB": "C","defComp": "<","ignore": true},
+        {"defA": "O","defB": "C","defComp": "==","ignore": true},
+        {"defA": "H","defB": "L","defComp": ">","ignore": false},
+        {"defA": "H","defB": "L","defComp": "<","ignore": true},
+        {"defA": "H","defB": "L","defComp": "==","ignore": true},
+        {"defA": "H","defB": "C","defComp": ">","ignore": false},
+        {"defA": "H","defB": "C","defComp": "<","ignore": true},
+        {"defA": "H","defB": "C","defComp": "==","ignore": true},
+        {"defA": "L","defB": "C","defComp": ">","ignore": false},
+        {"defA": "L","defB": "C","defComp": "<","ignore": true},
+        {"defA": "L","defB": "C","defComp": "==","ignore": true},
+      ];
+    
+    function candleDefinitionPairCompare(c, candle1, candle2) {
+      if (c.defComp == ">") {
+        return parseInt(candle1[c.defA]) > parseInt(candle2[c.defB])
+      } else if (c.defComp == "<") {
+        return parseInt(candle1[c.defA]) < parseInt(candle2[c.defB])
+      } else if (c.defComp == "==") {
+        return parseInt(candle1[c.defA]) == parseInt(candle2[c.defB])
+      }
+    }
+
+    function generateResultFromInput() {
+      let inputData = $("#input_data").val();
+      let candles = getCandle(inputData);
+      let result = generateResult(candles);
+      console.log(result);
+      $("#output_data").val(formatResult(result));
+    }
+
+    function generateResult(candles) {
+      let result = [];
+      for (let i=0; i<candles.length; i++) {
+        let candle = candles[i];
+        let candleResult = "";
+        for (let j=0; j<candleDefinitionPairs.length; j++) {
+          let c = candleDefinitionPairs[j];
+          if (c.ignore) {
+            continue;
+          }
+          if (candleDefinitionPairCompare(c, candle, candle)) {
+            candleResult += ("AND(" + c.defA + c.defComp + c.defB + ")");
+          }
+        }
+
+        // remove the first AND if not empty
+        if (candleResult != "") {
+          candleResult = candleResult.substr(3);
+        }
+
+        // push to stack
+        result.push(candleResult);
+      }
+
+
+      // for (let i=0; i<candleDefinitionPairs.length; i++) {
+      //   let cDef = candleDefinitionPairs[i];
+      //   if (cDef["compare"](candles[0])) {
+      //     result += ("AND(" + cDef["defA"] + cDef["devComp"] + cDef["defB"] + ")")
+      //   }
+      // }
+      return result
+    }
+
+    function formatResult(res) {
+      let resultString = "";
+      for (let i=0; i<res.length; i++) {
+        // for (let j=0; j<res[i].length; j++) {
+        resultString += (res[i] + "\n");
+        // }
+      }
+      return resultString
+    }
+
+    function getCandle(inputRawRaw) {
+      let inputSlicedRaw = inputRawRaw.split("\n");
+      let inputSlicedSliced = [];
+      for (let i=0; i<inputSlicedRaw.length; i++) {
+        let slicedCandle = inputSlicedRaw[i].split(",");
+        let slicedCandleMap = {};
+        slicedCandleMap["O"] = slicedCandle[0];
+        slicedCandleMap["H"] = slicedCandle[1];
+        slicedCandleMap["L"] = slicedCandle[2];
+        slicedCandleMap["C"] = slicedCandle[3];
+        inputSlicedSliced.push(slicedCandleMap);
+      }
+      return inputSlicedSliced
+    }
+  </script>
 </html>
