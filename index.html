@@ -48,6 +48,8 @@
         {"defA": "L","defB": "C","defComp": "==","ignore": true},
       ];
     
+    let maxCandleDefinitionRange = 5;
+
     function candleDefinitionPairCompare(c, candle1, candle2) {
       if (c.defComp == ">") {
         return parseInt(candle1[c.defA]) > parseInt(candle2[c.defB])
@@ -62,50 +64,60 @@
       let inputData = $("#input_data").val();
       let candles = getCandle(inputData);
       let result = generateResult(candles);
-      console.log(result);
+      // console.log(result);
       $("#output_data").val(formatResult(result));
     }
 
     function generateResult(candles) {
       let result = [];
       for (let i=0; i<candles.length; i++) {
-        let candle = candles[i];
-        let candleResult = "";
-        for (let j=0; j<candleDefinitionPairs.length; j++) {
-          let c = candleDefinitionPairs[j];
-          if (c.ignore) {
+        let candleResults = [];
+        for (let cDefRange=1; cDefRange<=maxCandleDefinitionRange; cDefRange++) {
+          let candleResult = "";
+          // validate out of array range
+          if ((i+cDefRange) > candles.length) {
             continue;
           }
-          if (candleDefinitionPairCompare(c, candle, candle)) {
-            candleResult += ("AND(" + c.defA + c.defComp + c.defB + ")");
+          for (let iA=0; iA<cDefRange; iA++) {
+            let candleA = candles[i+iA];
+            for (let iB=0; iB<cDefRange; iB++) {
+              let candleB = candles[i+iB];
+              for (let j=0; j<candleDefinitionPairs.length; j++) {
+                let c = candleDefinitionPairs[j];
+                if (c.ignore) {
+                  continue;
+                }
+                if (candleDefinitionPairCompare(c, candleA, candleB)) {
+                  candleResult += ("AND(" + c.defA + (i+iA) + c.defComp + c.defB + (i+iB) + ")");
+                }
+              }
+            }
           }
-        }
+          // remove the first AND if not empty
+          if (candleResult != "") {
+            candleResult = candleResult.substr(3);
+          }
 
-        // remove the first AND if not empty
-        if (candleResult != "") {
-          candleResult = candleResult.substr(3);
+          // push to stack
+          candleResults.push(candleResult);
         }
-
-        // push to stack
-        result.push(candleResult);
+        result.push(candleResults);
       }
-
-
-      // for (let i=0; i<candleDefinitionPairs.length; i++) {
-      //   let cDef = candleDefinitionPairs[i];
-      //   if (cDef["compare"](candles[0])) {
-      //     result += ("AND(" + cDef["defA"] + cDef["devComp"] + cDef["defB"] + ")")
-      //   }
-      // }
       return result
     }
 
     function formatResult(res) {
       let resultString = "";
       for (let i=0; i<res.length; i++) {
-        // for (let j=0; j<res[i].length; j++) {
-        resultString += (res[i] + "\n");
-        // }
+        let line = "";
+        for (let j=0; j<res[i].length; j++) {
+          line += ("," + res[i][j]);
+        }
+        // remove last ","
+        if (line != "") {
+          line = line.substr(1);
+        }
+        resultString += (line + "\n");
       }
       return resultString
     }
