@@ -4,14 +4,13 @@
   </head>
   <body>
     <h1>CanDef</h1>
-    <label>maxCandleDefinitionRange:</label>
-    <input type="number" id="input_maxCandleDefinitionRange"/>
-    </br>
-    <textarea style="height:20px;width:50%;" id="input_config" placeholder="config"></textarea>
-    <textarea style="height:200px;width:50%;" id="input_data" placeholder="input data"></textarea>
-    <br/>
-    <input type="button" value="Generate" onclick="generateResultFromInput()"/>
-    <br/>
+    <label>maxCandleDefinitionRange:</label><input type="number" id="input_maxCandleDefinitionRange"/></br>
+    <textarea style="height:20px;width:50%;" id="input_config" placeholder="config"></textarea><br/>
+    <textarea style="height:200px;width:50%;" id="input_data" placeholder="input data"></textarea><br/>
+    <label>columnPosition:</label><input type="text" id="input_columnPosition"/><br/>
+    <label>inputDelimiter:</label><input type="text" id="input_inputDelimiter"/><br/>
+    <label>outputDelimiter:</label><input type="text" id="input_outputDelimiter"/><br/>
+    <input type="button" value="Generate" onclick="generateResultFromInput()"/><br/>
     <br/>
     <textarea style="height:200px;width:50%;" id="output_data" placeholder="output data"></textarea>
   </body>
@@ -19,26 +18,32 @@
   <script>
     jQuery(document).ready(function () {
       $("#input_data").val(
-        "10,10,10,10\n" +
-        "10,12,10,10\n" +
-        "10,10,8,10\n" +
-        "10,12,8,10\n" +
-        "10,12,10,12\n" +
-        "10,14,10,12\n" +
-        "10,12,8,12\n" +
-        "10,14,8,12\n" +
-        "10,10,8,8\n" +
-        "10,12,8,8\n" +
-        "10,10,6,8\n" +
-        "10,12,6,8\n"
+        "text1\ttext2\t10\t10\t10\t10\n" +
+        "text1\ttext2\t10\t12\t10\t10\n" +
+        "text1\ttext2\t10\t10\t8\t10\n" +
+        "text1\ttext2\t10\t12\t8\t10\n" +
+        "text1\ttext2\t10\t12\t10\t12\n" +
+        "text1\ttext2\t10\t14\t10\t12\n" +
+        "text1\ttext2\t10\t12\t8\t12\n" +
+        "text1\ttext2\t10\t14\t8\t12\n" +
+        "text1\ttext2\t10\t10\t8\t8\n" +
+        "text1\ttext2\t10\t12\t8\t8\n" +
+        "text1\ttext2\t10\t10\t6\t8\n" +
+        "text1\ttext2\t10\t12\t6\t8\n"
       );
 
       $("#input_maxCandleDefinitionRange").val(maxCandleDefinitionRange);
       $("#input_config").val(JSON.stringify(candleDefinitionPairs));
+      $("#input_inputDelimiter").val(inputDelimiter);
+      $("#input_outputDelimiter").val(outputDelimiter);
+      $("#input_columnPosition").val(JSON.stringify(columnPosition));
       // $("#input_config").val(JSON.stringify(candleDefinitionPairs, null, 2));
     });
 
     let maxCandleDefinitionRange = 5;
+    let inputDelimiter = "\t";
+    let outputDelimiter = ",";
+    let columnPosition = {"O": 2,"H": 3,"L": 4,"C": 5};
 
     let candleDefinitionPairs = [
         {"defA": "O","defB": "H","defComp": ">","ignore": false},
@@ -74,10 +79,13 @@
     function generateResultFromInput() {
       // setup config
       maxCandleDefinitionRange = $("#input_maxCandleDefinitionRange").val();
+      inputDelimiter = $("#input_inputDelimiter").val();
+      outputDelimiter = $("#input_outputDelimiter").val();
+      columnPosition = JSON.parse($("#input_columnPosition").val());
       candleDefinitionPairs = JSON.parse($("#input_config").val());
 
       // getting result from input
-      let inputData = $("#input_data").val();
+      let inputData = $.trim($("#input_data").val());
       let candles = getCandle(inputData);
       let result = generateResult(candles);
       // console.log(result);
@@ -131,9 +139,9 @@
       for (let i=0; i<res.length; i++) {
         let line = "";
         for (let j=0; j<res[i].length; j++) {
-          line += ("," + res[i][j]);
+          line += (outputDelimiter + res[i][j]);
         }
-        // remove last ","
+        // remove first delimiter
         if (line != "") {
           line = line.substr(1);
         }
@@ -146,12 +154,12 @@
       let inputSlicedRaw = inputRawRaw.split("\n");
       let inputSlicedSliced = [];
       for (let i=0; i<inputSlicedRaw.length; i++) {
-        let slicedCandle = inputSlicedRaw[i].split(",");
+        let slicedCandle = inputSlicedRaw[i].split(inputDelimiter);
         let slicedCandleMap = {};
-        slicedCandleMap["O"] = slicedCandle[0];
-        slicedCandleMap["H"] = slicedCandle[1];
-        slicedCandleMap["L"] = slicedCandle[2];
-        slicedCandleMap["C"] = slicedCandle[3];
+        slicedCandleMap["O"] = slicedCandle[parseInt(columnPosition.O)];
+        slicedCandleMap["H"] = slicedCandle[parseInt(columnPosition.H)];
+        slicedCandleMap["L"] = slicedCandle[parseInt(columnPosition.L)];
+        slicedCandleMap["C"] = slicedCandle[parseInt(columnPosition.C)];
         inputSlicedSliced.push(slicedCandleMap);
       }
       return inputSlicedSliced
