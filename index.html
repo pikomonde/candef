@@ -91,13 +91,13 @@
         for (let cDefRange=1; cDefRange<=maxCandleDefinitionRange; cDefRange++) {
           let candleResult = "";
           // validate out of array range
-          if ((i+cDefRange) > candles.length) {
+          if ((i+1-cDefRange) < 0) {
             continue;
           }
           for (let iA=0; iA<cDefRange; iA++) {
-            let candleA = candles[i+iA];
+            let candleA = candles[i-iA];
             for (let iB=0; iB<cDefRange; iB++) {
-              let candleB = candles[i+iB];
+              let candleB = candles[i-iB];
               for (let j=0; j<candleDefinitionPairs.length; j++) {
                 let c = candleDefinitionPairs[j];
                 if (c.ignore) {
