@@ -106,8 +106,8 @@
                 if (candleDefinitionPairCompare(c, candleA, candleB)) {
                   let iAStr = iA
                   let iBStr = iB
-                  if (iA==0) { iAstr = "" }
-                  if (iB==0) { iBstr = "" }
+                  if (iA=="0") { iAstr = "" }
+                  if (iB=="0") { iBstr = "" }
                   candleResult += ("AND(" + c.defA + (iAStr) + c.defComp + c.defB + (iBStr) + ")");
                 }
               }
